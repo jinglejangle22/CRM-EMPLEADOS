@@ -1,0 +1,488 @@
+// CRM Empleados y Candidatos — Fase 1
+// Ver /Users/mac/.claude/plans/foamy-noodling-conway.md para el diseño completo.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Núcleo
+// ---------------------------------------------------------------------------
+
+model Company {
+  id        String @id @default(cuid())
+  name      String
+  shortName String
+  slug      String @unique
+  colorHex  String
+
+  users      UserCompany[]
+  tags       Tag[]
+  candidates Candidate[]
+  employees  Employee[]
+  interviews Interview[]
+  incidents  EmployeeIncident[]
+
+  createdAt DateTime @default(now())
+
+  @@map("companies")
+}
+
+enum UserRole {
+  ADMIN
+  ENCARGADO
+  RRHH
+  LECTURA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+
+  companies UserCompany[]
+
+  createdAt DateTime @default(now())
+
+  createdCandidates    Candidate[]         @relation("CandidateCreatedBy")
+  candidateNotes       CandidateNote[]
+  employeeNotes        EmployeeNote[]
+  recordedIncidents    EmployeeIncident[]  @relation("IncidentRecordedBy")
+  recordedRecognitions EmployeeRecognition[] @relation("RecognitionRecordedBy")
+  interactions         Interaction[]       @relation("InteractionUser")
+  createdFollowups     Followup[]          @relation("FollowupCreatedBy")
+  timelineEvents       TimelineEvent[]     @relation("TimelineEventCreatedBy")
+  uploadedFiles        FileAsset[]         @relation("FileUploadedBy")
+  interviewsAsInterviewer Interview[]      @relation("InterviewInterviewer")
+
+  @@map("users")
+}
+
+model UserCompany {
+  userId    String
+  companyId String
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([userId, companyId])
+  @@map("user_companies")
+}
+
+model Tag {
+  id        String  @id @default(cuid())
+  companyId String
+  name      String
+  category  String?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  candidateTags CandidateTag[]
+  employeeTags  EmployeeTag[]
+
+  @@unique([companyId, name])
+  @@map("tags")
+}
+
+// ---------------------------------------------------------------------------
+// Candidatos
+// ---------------------------------------------------------------------------
+
+enum CandidateSource {
+  INSTAGRAM
+  WHATSAPP
+  COMPUTRABAJO
+  INDEED
+  REFERIDO
+  CARTEL
+  OTRO
+}
+
+enum CandidateQualification {
+  RECOMENDADO
+  EVALUAR
+  NO_CONTRATAR
+}
+
+enum CandidateStage {
+  CV_RECIBIDO
+  CV_REVISADO
+  CONTACTADO
+  ENTREVISTA_AGENDADA
+  ENTREVISTADO
+  PRUEBA_LABORAL
+  CONTRATADO
+  NO_SELECCIONADO
+}
+
+model Candidate {
+  id                 String   @id @default(cuid())
+  firstName          String
+  lastName            String
+  photoFileId        String?
+  phone              String
+  email              String?
+  birthDate          DateTime?
+  address            String?
+  zone               String?
+  companyId          String
+  position           String
+  availability       String?
+  salaryExpectation  String?
+  experience         String?
+  cvReceivedDate     DateTime @default(now())
+  source             CandidateSource
+  cvFileId           String?
+  rating             Int?     // 1-5
+  qualification      CandidateQualification?
+  qualificationReason String?
+  stage              CandidateStage @default(CV_RECIBIDO)
+  isArchived         Boolean  @default(false)
+  availableForFuture Boolean  @default(true)
+
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company          @relation(fields: [companyId], references: [id])
+  createdBy   User             @relation("CandidateCreatedBy", fields: [createdById], references: [id])
+  photoFile   FileAsset?       @relation("CandidatePhoto", fields: [photoFileId], references: [id])
+  cvFile      FileAsset?       @relation("CandidateCv", fields: [cvFileId], references: [id])
+
+  tags          CandidateTag[]
+  notes         CandidateNote[]
+  interviews    Interview[]
+  interactions  Interaction[]
+  followups     Followup[]
+  timelineEvents TimelineEvent[]
+  employee      Employee?
+
+  @@map("candidates")
+}
+
+model CandidateTag {
+  candidateId String
+  tagId       String
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  tag       Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([candidateId, tagId])
+  @@map("candidate_tags")
+}
+
+model CandidateNote {
+  id          String @id @default(cuid())
+  candidateId String
+  authorId    String
+  text        String
+  createdAt   DateTime @default(now())
+
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id])
+
+  @@map("candidate_notes")
+}
+
+// ---------------------------------------------------------------------------
+// Empleados
+// ---------------------------------------------------------------------------
+
+enum EmployeeStatus {
+  EN_PRUEBA
+  ACTIVO
+  LICENCIA
+  VACACIONES
+  SUSPENDIDO
+  DESVINCULADO
+}
+
+model Employee {
+  id                     String   @id @default(cuid())
+  candidateId            String?  @unique
+  firstName              String
+  lastName               String
+  photoFileId            String?
+  dni                    String?
+  cuil                   String?
+  birthDate              DateTime?
+  phone                  String?
+  whatsapp               String?
+  email                  String?
+  address                String?
+  emergencyContactName   String?
+  emergencyContactPhone  String?
+  companyId              String
+  position               String
+  hireDate               DateTime @default(now())
+  terminationDate        DateTime?
+  workday                String?
+  shift                  String?
+  salary                 Decimal? @db.Decimal(12, 2) // campo sensible, ver lib/permissions.ts
+  contractType           String?
+  status                 EmployeeStatus @default(EN_PRUEBA)
+
+  createdAt DateTime @default(now())
+
+  candidate Candidate? @relation(fields: [candidateId], references: [id])
+  company   Company    @relation(fields: [companyId], references: [id])
+  photoFile FileAsset? @relation("EmployeePhoto", fields: [photoFileId], references: [id])
+
+  tags           EmployeeTag[]
+  notes          EmployeeNote[]
+  incidents      EmployeeIncident[]
+  recognitions   EmployeeRecognition[]
+  interactions   Interaction[]
+  followups      Followup[]
+  timelineEvents TimelineEvent[]
+
+  @@map("employees")
+}
+
+model EmployeeTag {
+  employeeId String
+  tagId      String
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([employeeId, tagId])
+  @@map("employee_tags")
+}
+
+model EmployeeNote {
+  id         String @id @default(cuid())
+  employeeId String
+  authorId   String
+  text       String
+  createdAt  DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  author   User     @relation(fields: [authorId], references: [id])
+
+  @@map("employee_notes")
+}
+
+enum IncidentType {
+  LLEGADA_TARDE
+  AUSENCIA
+  AUSENCIA_SIN_AVISO
+  DIFERENCIA_CAJA
+  MALA_ATENCION
+  INCUMPLIMIENTO_TAREAS
+  USO_INDEBIDO_CELULAR
+  INCUMPLIMIENTO_PROTOCOLO
+  OTRO
+}
+
+enum IncidentLevel {
+  OBSERVACION
+  ADVERTENCIA
+  LLAMADO_FORMAL
+}
+
+model EmployeeIncident {
+  id                 String   @id @default(cuid())
+  employeeId         String
+  companyId          String
+  occurredAt         DateTime
+  type               IncidentType
+  level              IncidentLevel
+  description        String
+  evidenceFileId     String?
+  recordedById       String
+  employeeStatement  String?
+  createdAt          DateTime @default(now())
+
+  employee     Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  company      Company    @relation(fields: [companyId], references: [id])
+  recordedBy   User       @relation("IncidentRecordedBy", fields: [recordedById], references: [id])
+  evidenceFile FileAsset? @relation("IncidentEvidence", fields: [evidenceFileId], references: [id])
+
+  @@map("employee_incidents")
+}
+
+enum RecognitionType {
+  RECONOCIMIENTO
+  BUEN_DESEMPENO
+  FELICITACION_CLIENTE
+  OBJETIVO_CUMPLIDO
+  MEJORA_NOTABLE
+}
+
+model EmployeeRecognition {
+  id           String   @id @default(cuid())
+  employeeId   String
+  occurredAt   DateTime
+  type         RecognitionType
+  description  String
+  recordedById String
+  createdAt    DateTime @default(now())
+
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  recordedBy User     @relation("RecognitionRecordedBy", fields: [recordedById], references: [id])
+
+  @@map("employee_recognitions")
+}
+
+// ---------------------------------------------------------------------------
+// CRM: interacciones, seguimientos y timeline
+// ---------------------------------------------------------------------------
+
+enum InteractionType {
+  LLAMADA
+  WHATSAPP
+  EMAIL
+  PRESENCIAL
+  OTRO
+}
+
+enum InteractionResult {
+  CONTACTADO
+  NO_RESPONDIO
+  VOLVER_A_LLAMAR
+  INTERESADO
+  NO_INTERESADO
+  PENDIENTE
+}
+
+model Interaction {
+  id            String   @id @default(cuid())
+  candidateId   String?
+  employeeId    String?
+  type          InteractionType
+  occurredAt    DateTime
+  result        InteractionResult
+  note          String?
+  userId        String
+  nextFollowUpAt DateTime?
+  createdAt     DateTime @default(now())
+
+  candidate Candidate? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  employee  Employee?  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  user      User       @relation("InteractionUser", fields: [userId], references: [id])
+
+  followup Followup?
+
+  @@map("interactions")
+}
+
+enum FollowupStatus {
+  PENDIENTE
+  COMPLETADO
+  CANCELADO
+}
+
+model Followup {
+  id                  String   @id @default(cuid())
+  candidateId         String?
+  employeeId          String?
+  dueAt               DateTime
+  note                String
+  status              FollowupStatus @default(PENDIENTE)
+  createdById         String
+  completedAt         DateTime?
+  resultInteractionId String?  @unique
+  createdAt           DateTime @default(now())
+
+  candidate         Candidate?   @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  employee          Employee?    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy         User         @relation("FollowupCreatedBy", fields: [createdById], references: [id])
+  resultInteraction Interaction? @relation(fields: [resultInteractionId], references: [id])
+
+  @@map("followups")
+}
+
+model TimelineEvent {
+  id          String   @id @default(cuid())
+  candidateId String?
+  employeeId  String?
+  type        String   // CV_RECEIVED | STAGE_CHANGE | INTERACTION | NOTE | INTERVIEW_SCHEDULED |
+                        // INTERVIEW_UPDATED | INCIDENT | RECOGNITION | HIRED | STATUS_CHANGE |
+                        // FOLLOWUP_CREATED | FOLLOWUP_COMPLETED | FOLLOWUP_CANCELLED
+  title       String
+  description String?
+  sourceType  String?
+  sourceId    String?
+  occurredAt  DateTime
+  createdById String
+  createdAt   DateTime @default(now())
+
+  candidate Candidate? @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  employee  Employee?  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy User       @relation("TimelineEventCreatedBy", fields: [createdById], references: [id])
+
+  @@index([candidateId, occurredAt])
+  @@index([employeeId, occurredAt])
+  @@map("timeline_events")
+}
+
+// ---------------------------------------------------------------------------
+// Entrevistas
+// ---------------------------------------------------------------------------
+
+enum InterviewModality {
+  PRESENCIAL
+  VIRTUAL
+}
+
+enum InterviewStatus {
+  PENDIENTE
+  CONFIRMADA
+  REPROGRAMADA
+  CANCELADA
+  SE_PRESENTO
+  NO_SE_PRESENTO
+}
+
+model Interview {
+  id             String   @id @default(cuid())
+  candidateId    String
+  companyId      String
+  position       String
+  startsAt       DateTime
+  interviewerId  String?
+  modality       InterviewModality
+  address        String?
+  notes          String?
+  status         InterviewStatus @default(PENDIENTE)
+  createdAt      DateTime @default(now())
+
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  company     Company   @relation(fields: [companyId], references: [id])
+  interviewer User?     @relation("InterviewInterviewer", fields: [interviewerId], references: [id])
+
+  @@map("interviews")
+}
+
+// ---------------------------------------------------------------------------
+// Archivos
+// ---------------------------------------------------------------------------
+
+model FileAsset {
+  id           String   @id @default(cuid())
+  key          String
+  bucket       String
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  isSensitive  Boolean  @default(false)
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  uploadedBy User @relation("FileUploadedBy", fields: [uploadedById], references: [id])
+
+  candidatePhotos Candidate[]         @relation("CandidatePhoto")
+  candidateCvs    Candidate[]         @relation("CandidateCv")
+  employeePhotos  Employee[]          @relation("EmployeePhoto")
+  incidentEvidence EmployeeIncident[] @relation("IncidentEvidence")
+
+  @@map("file_assets")
+}
