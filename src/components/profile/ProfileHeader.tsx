@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FileText } from "lucide-react";
 import { initials, formatAge } from "@/lib/format";
 import { useAppState } from "@/lib/app-state";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -17,6 +17,7 @@ export function ProfileHeader({
   statusTone,
   rating,
   photoFileId,
+  onViewCv,
 }: {
   firstName: string;
   lastName: string;
@@ -27,6 +28,7 @@ export function ProfileHeader({
   statusTone: "neutral" | "green" | "amber" | "red" | "blue" | "violet";
   rating?: number;
   photoFileId?: string;
+  onViewCv?: () => void;
 }) {
   const router = useRouter();
   const { allCompanies } = useAppState();
@@ -57,9 +59,21 @@ export function ProfileHeader({
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg font-semibold text-neutral-900">
-            {firstName} {lastName}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="truncate text-lg font-semibold text-neutral-900">
+              {firstName} {lastName}
+            </p>
+            {onViewCv && (
+              <button
+                type="button"
+                onClick={onViewCv}
+                className="flex shrink-0 items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 active:bg-violet-100"
+              >
+                <FileText className="size-3.5" />
+                CV
+              </button>
+            )}
+          </div>
           <p className="truncate text-sm text-neutral-500">
             {position} {age ? `· ${age} años` : ""}
           </p>

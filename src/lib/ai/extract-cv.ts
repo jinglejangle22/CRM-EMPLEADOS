@@ -30,7 +30,11 @@ const RESPONSE_SCHEMA = {
   properties: {
     firstName: { type: "string", description: "Nombre de pila de la persona" },
     lastName: { type: "string", description: "Apellido de la persona" },
-    phone: { type: "string", description: "Teléfono de contacto, con código de área si figura" },
+    phone: {
+      type: "string",
+      description:
+        "Teléfono de contacto, con código de área si figura. Puede aparecer como 'Tel', 'Cel', 'Celular', 'WhatsApp', junto a un ícono de teléfono, o en el encabezado/pie de página junto al email.",
+    },
     email: { type: "string", description: "Email de contacto" },
     address: { type: "string", description: "Dirección de residencia si figura" },
     zone: { type: "string", description: "Barrio o zona de residencia si figura" },
@@ -41,15 +45,24 @@ const RESPONSE_SCHEMA = {
       type: "string",
       description: "Resumen breve (2-4 líneas) de la experiencia laboral relevante: empresas, puestos, tiempo",
     },
-    birthDate: { type: "string", description: "Fecha de nacimiento en formato YYYY-MM-DD si figura" },
+    birthDate: {
+      type: "string",
+      description:
+        "Fecha de nacimiento en formato YYYY-MM-DD. Puede figurar como 'Fecha de nacimiento', 'Nacimiento', 'Nació el', junto al DNI, o como edad (ej. '25 años'), en cuyo caso se calcula el año aproximado de nacimiento y se devuelve como 1 de enero de ese año.",
+    },
   },
 } as const;
 
-const PROMPT = `Sos un asistente que extrae datos de un CV (currículum) para cargarlo en un CRM de RRHH.
-Analizá el archivo adjunto y devolvé únicamente los datos que puedas identificar con confianza.
-No inventes datos que no estén en el CV: si un campo no aparece, omitilo del JSON.
+function buildPrompt(): string {
+  const currentYear = new Date().getFullYear();
+  return `Sos un asistente que extrae datos de un CV (currículum) para cargarlo en un CRM de RRHH.
+Analizá TODO el archivo con atención: encabezado, pie de página, datos de contacto y cualquier sección con datos personales, no solo el cuerpo principal del texto.
+Buscá especialmente el teléfono y la fecha de nacimiento/edad, que suelen estar en el encabezado junto al nombre y el email, y a veces son fáciles de pasar por alto.
+El año actual es ${currentYear}. Si el CV menciona la edad de la persona pero no una fecha de nacimiento exacta, calculá el año de nacimiento aproximado (año actual menos la edad) y devolvé "${currentYear}-01-01" con ese año como birthDate.
+No inventes datos que no estén en el CV de ninguna forma (ni siquiera como edad): si un campo no aparece, omitilo del JSON.
 Los nombres propios y direcciones deben respetar mayúsculas/minúsculas naturales del español.
 El teléfono debe conservarse tal como figura (con o sin código de país).`;
+}
 
 export class CvExtractionError extends Error {}
 
@@ -61,6 +74,9 @@ function getApiKey(): string {
 
 const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1500;
+// Gemini a veces se queda "colgado" sin responder ni fallar: cortamos la conexión
+// nosotros mismos para no dejar al usuario esperando indefinidamente.
+const CALL_TIMEOUT_MS = 20000;
 // Códigos que indican una falla transitoria del lado de Gemini (sobrecarga/timeout),
 // no un problema con el archivo o la request: vale la pena reintentar.
 const RETRYABLE_STATUS = new Set([429, 500, 503, 504]);
@@ -70,21 +86,28 @@ function sleep(ms: number) {
 }
 
 async function callGemini(apiKey: string, mimeType: string, base64: string) {
-  return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [{ text: PROMPT }, { inlineData: { mimeType, data: base64 } }],
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CALL_TIMEOUT_MS);
+  try {
+    return await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: buildPrompt() }, { inlineData: { mimeType, data: base64 } }],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: RESPONSE_SCHEMA,
         },
-      ],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA,
-      },
-    }),
-  });
+      }),
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export async function extractCandidateDataFromCv(file: File): Promise<ExtractedCandidateData> {
@@ -100,8 +123,23 @@ export async function extractCandidateDataFromCv(file: File): Promise<ExtractedC
   }
 
   let res: Response | undefined;
+  let timedOut = false;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    res = await callGemini(apiKey, mimeType, base64);
+    try {
+      res = await callGemini(apiKey, mimeType, base64);
+      timedOut = false;
+    } catch (err) {
+      timedOut = err instanceof Error && err.name === "AbortError";
+      if (!timedOut || attempt === MAX_ATTEMPTS) {
+        throw new CvExtractionError(
+          timedOut
+            ? "El servicio de IA tardó demasiado en responder. Probá de nuevo."
+            : "No se pudo conectar con el servicio de IA."
+        );
+      }
+      await sleep(RETRY_DELAY_MS * attempt);
+      continue;
+    }
     if (res.ok || !RETRYABLE_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) break;
     await sleep(RETRY_DELAY_MS * attempt);
   }

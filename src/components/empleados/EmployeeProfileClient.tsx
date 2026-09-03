@@ -55,6 +55,7 @@ export function EmployeeProfileClient({
         statusLabel={statusMeta?.label ?? employee.status}
         statusTone={statusMeta?.tone ?? "neutral"}
         photoFileId={employee.photoUrl}
+        onViewCv={cvFileId ? () => setCvOpen(true) : undefined}
       />
 
       <QuickActionsRow phone={employee.whatsapp ?? employee.phone} onOpenActions={() => setActionsOpen(true)} />
@@ -90,14 +91,6 @@ export function EmployeeProfileClient({
               label: "Sueldo",
               value: employee.salary != null ? (
                 <SensitiveField value={formatCurrency(employee.salary)} canView={salaryVisible} />
-              ) : undefined,
-            },
-            {
-              label: "CV",
-              value: cvFileId ? (
-                <button type="button" onClick={() => setCvOpen(true)} className="font-medium text-violet-600">
-                  Ver CV en pantalla completa
-                </button>
               ) : undefined,
             },
           ]}

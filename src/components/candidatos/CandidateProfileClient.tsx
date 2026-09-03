@@ -75,6 +75,7 @@ export function CandidateProfileClient({
         statusTone={stageMeta?.tone ?? "neutral"}
         rating={candidate.rating}
         photoFileId={candidate.photoUrl}
+        onViewCv={candidate.cvFileId ? () => setCvOpen(true) : undefined}
       />
 
       <QuickActionsRow
@@ -116,14 +117,6 @@ export function CandidateProfileClient({
               value: candidate.qualification ? QUALIFICATION_LABELS[candidate.qualification] : undefined,
             },
             { label: "Motivo", value: candidate.qualificationReason },
-            {
-              label: "CV",
-              value: candidate.cvFileId ? (
-                <button type="button" onClick={() => setCvOpen(true)} className="font-medium text-violet-600">
-                  Ver CV en pantalla completa
-                </button>
-              ) : undefined,
-            },
           ]}
         />
 

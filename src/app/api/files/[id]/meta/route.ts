@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { resolveFileAccess } from "@/lib/files";
-import { getSignedDownloadUrl } from "@/lib/storage";
 
-/**
- * Único punto de acceso a archivos privados. Nunca se expone una URL pública
- * de S3/R2: esta ruta valida permisos contra la entidad dueña del archivo y
- * devuelve una redirección a una URL firmada de corta duración.
- */
+/** Metadata de un archivo privado (mimeType, nombre) sin exponer la URL firmada. */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
   const user = session?.user ? { id: session.user.id, role: session.user.role, companyIds: session.user.companyIds } : null;
@@ -16,6 +11,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const result = await resolveFileAccess(id, user);
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status });
 
-  const url = await getSignedDownloadUrl(result.file.key, result.file.bucket);
-  return NextResponse.redirect(url);
+  return NextResponse.json({ mimeType: result.file.mimeType, originalName: result.file.originalName });
 }
