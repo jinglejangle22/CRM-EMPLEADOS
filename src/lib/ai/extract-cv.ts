@@ -59,6 +59,34 @@ function getApiKey(): string {
   return key;
 }
 
+const MAX_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 1500;
+// Códigos que indican una falla transitoria del lado de Gemini (sobrecarga/timeout),
+// no un problema con el archivo o la request: vale la pena reintentar.
+const RETRYABLE_STATUS = new Set([429, 500, 503, 504]);
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function callGemini(apiKey: string, mimeType: string, base64: string) {
+  return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [{ text: PROMPT }, { inlineData: { mimeType, data: base64 } }],
+        },
+      ],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: RESPONSE_SCHEMA,
+      },
+    }),
+  });
+}
+
 export async function extractCandidateDataFromCv(file: File): Promise<ExtractedCandidateData> {
   const apiKey = getApiKey();
 
@@ -71,26 +99,19 @@ export async function extractCandidateDataFromCv(file: File): Promise<ExtractedC
     throw new CvExtractionError("Formato de archivo no soportado para extracción automática. Usá PDF, JPG, PNG o WEBP.");
   }
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: PROMPT }, { inlineData: { mimeType, data: base64 } }],
-          },
-        ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: RESPONSE_SCHEMA,
-        },
-      }),
-    }
-  );
+  let res: Response | undefined;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    res = await callGemini(apiKey, mimeType, base64);
+    if (res.ok || !RETRYABLE_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) break;
+    await sleep(RETRY_DELAY_MS * attempt);
+  }
+
+  if (!res) throw new CvExtractionError("No se pudo conectar con el servicio de IA.");
 
   if (!res.ok) {
+    if (RETRYABLE_STATUS.has(res.status)) {
+      throw new CvExtractionError("El servicio de IA está saturado en este momento. Probá de nuevo en unos segundos.");
+    }
     const body = await res.text().catch(() => "");
     throw new CvExtractionError(`Error al procesar el CV (${res.status}): ${body.slice(0, 300)}`);
   }

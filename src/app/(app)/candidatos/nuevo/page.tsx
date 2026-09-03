@@ -35,15 +35,13 @@ export default function NewCandidatePage() {
   const [extracting, setExtracting] = useState(false);
   const [extractError, setExtractError] = useState<string | null>(null);
   const [autofilledFields, setAutofilledFields] = useState<string[]>([]);
+  const [lastCvFile, setLastCvFile] = useState<File | null>(null);
 
   if (!canManageCandidates(permissionUser)) {
     return <p className="p-4 text-sm text-neutral-500">No tenés permisos para cargar candidatos.</p>;
   }
 
-  async function handleCvChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  async function extractFromCv(file: File) {
     setExtracting(true);
     setExtractError(null);
     setAutofilledFields([]);
@@ -81,6 +79,13 @@ export default function NewCandidatePage() {
     }
   }
 
+  async function handleCvChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLastCvFile(file);
+    await extractFromCv(file);
+  }
+
   return (
     <div className="flex flex-col gap-4 px-4 pb-8 pt-4">
       <h1 className="text-lg font-semibold text-neutral-900">Nuevo candidato</h1>
@@ -115,7 +120,20 @@ export default function NewCandidatePage() {
             Leyendo el CV y completando los datos...
           </p>
         )}
-        {extractError && <p className="text-sm text-rose-600">{extractError}</p>}
+        {extractError && (
+          <div className="flex flex-col gap-1.5">
+            <p className="text-sm text-rose-600">{extractError}</p>
+            {lastCvFile && (
+              <button
+                type="button"
+                onClick={() => lastCvFile && extractFromCv(lastCvFile)}
+                className="self-start text-sm font-medium text-violet-600 underline"
+              >
+                Reintentar
+              </button>
+            )}
+          </div>
+        )}
         {autofilledFields.length > 0 && (
           <p className="flex items-center gap-2 text-sm text-emerald-600">
             <Sparkles className="size-4" />
