@@ -9,7 +9,10 @@
  * persiste nada automáticamente a partir de esta extracción.
  */
 
-const MODEL = "gemini-flash-latest";
+// Usamos el modelo "lite": es mucho más rápido (1-3s vs 20-25s+ de
+// gemini-flash-latest) y tiene una cuota gratuita diaria bastante más alta,
+// clave para no agotarla enseguida con pocos CV.
+const MODEL = "gemini-flash-lite-latest";
 
 export type ExtractedCandidateData = {
   firstName?: string;
@@ -76,7 +79,7 @@ const MAX_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1500;
 // Gemini a veces se queda "colgado" sin responder ni fallar: cortamos la conexión
 // nosotros mismos para no dejar al usuario esperando indefinidamente.
-const CALL_TIMEOUT_MS = 45000;
+const CALL_TIMEOUT_MS = 30000;
 // Códigos que indican una falla transitoria del lado de Gemini (sobrecarga/timeout),
 // no un problema con el archivo o la request: vale la pena reintentar.
 const RETRYABLE_STATUS = new Set([429, 500, 503, 504]);
@@ -102,11 +105,6 @@ async function callGemini(apiKey: string, mimeType: string, base64: string) {
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: RESPONSE_SCHEMA,
-          // Sin esto, el modelo "piensa" antes de responder (miles de tokens
-          // internos) y la extracción puede tardar 20-40s o más. Para esta
-          // tarea (extracción estructurada simple) no aporta nada y solo suma
-          // latencia, así que lo desactivamos.
-          thinkingConfig: { thinkingBudget: 0 },
         },
       }),
     });
