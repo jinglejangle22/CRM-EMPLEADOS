@@ -15,6 +15,7 @@ import { RegisterRecognitionDialog } from "@/components/empleados/RegisterRecogn
 import { ChangeEmployeeStatusDialog } from "@/components/empleados/ChangeEmployeeStatusDialog";
 import { Timeline } from "@/components/timeline/Timeline";
 import { SensitiveField } from "@/components/shared/SensitiveField";
+import { CvViewerDialog } from "@/components/shared/CvViewerDialog";
 import { useAppState } from "@/lib/app-state";
 import { canViewSalary } from "@/lib/permissions";
 import { formatCurrency, formatDateShort } from "@/lib/format";
@@ -24,17 +25,20 @@ export function EmployeeProfileClient({
   nextFollowupNote,
   nextFollowupDueAt,
   timeline,
+  cvFileId,
 }: {
   employee: Employee;
   nextFollowupNote: string | null;
   nextFollowupDueAt: string | null;
   timeline: TimelineEvent[];
+  cvFileId?: string;
 }) {
   const { permissionUser, allCompanies } = useAppState();
   const [actionsOpen, setActionsOpen] = useState(false);
   const [dialog, setDialog] = useState<"interaccion" | "seguimiento" | "incidencia" | "reconocimiento" | "estado" | null>(
     null
   );
+  const [cvOpen, setCvOpen] = useState(false);
 
   const company = allCompanies.find((c) => c.id === employee.companyId);
   const statusMeta = employeeStatusMeta[employee.status];
@@ -86,6 +90,14 @@ export function EmployeeProfileClient({
               label: "Sueldo",
               value: employee.salary != null ? (
                 <SensitiveField value={formatCurrency(employee.salary)} canView={salaryVisible} />
+              ) : undefined,
+            },
+            {
+              label: "CV",
+              value: cvFileId ? (
+                <button type="button" onClick={() => setCvOpen(true)} className="font-medium text-violet-600">
+                  Ver CV en pantalla completa
+                </button>
               ) : undefined,
             },
           ]}
@@ -142,6 +154,12 @@ export function EmployeeProfileClient({
         onOpenChange={(open) => setDialog(open ? "estado" : null)}
         employeeId={employee.id}
         currentStatus={employee.status}
+      />
+      <CvViewerDialog
+        open={cvOpen}
+        onOpenChange={setCvOpen}
+        fileId={cvFileId}
+        title={`CV de ${employee.firstName} ${employee.lastName}`}
       />
     </div>
   );

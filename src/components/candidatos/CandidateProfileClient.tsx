@@ -14,6 +14,7 @@ import { RegisterInteractionDialog } from "@/components/profile/RegisterInteract
 import { ScheduleFollowupDialog } from "@/components/profile/ScheduleFollowupDialog";
 import { ChangeStageDialog } from "@/components/candidatos/ChangeStageDialog";
 import { Timeline } from "@/components/timeline/Timeline";
+import { CvViewerDialog } from "@/components/shared/CvViewerDialog";
 import { formatDateShort } from "@/lib/format";
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -50,6 +51,7 @@ export function CandidateProfileClient({
   const company = allCompanies.find((c) => c.id === candidate.companyId);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [dialog, setDialog] = useState<"interaccion" | "seguimiento" | "etapa" | null>(null);
+  const [cvOpen, setCvOpen] = useState(false);
 
   const stageMeta = candidateStageMeta[candidate.stage];
 
@@ -117,9 +119,9 @@ export function CandidateProfileClient({
             {
               label: "CV",
               value: candidate.cvFileId ? (
-                <a href={`/api/files/${candidate.cvFileId}`} target="_blank" rel="noreferrer" className="text-violet-600">
-                  Ver CV
-                </a>
+                <button type="button" onClick={() => setCvOpen(true)} className="font-medium text-violet-600">
+                  Ver CV en pantalla completa
+                </button>
               ) : undefined,
             },
           ]}
@@ -161,6 +163,12 @@ export function CandidateProfileClient({
         onOpenChange={(open) => setDialog(open ? "etapa" : null)}
         candidateId={candidate.id}
         currentStage={candidate.stage}
+      />
+      <CvViewerDialog
+        open={cvOpen}
+        onOpenChange={setCvOpen}
+        fileId={candidate.cvFileId}
+        title={`CV de ${candidate.firstName} ${candidate.lastName}`}
       />
     </div>
   );

@@ -16,7 +16,7 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
   });
   if (!employeeRow || !canViewCompany(user, employeeRow.companyId)) notFound();
 
-  const [followupRows, timelineRows] = await Promise.all([
+  const [followupRows, timelineRows, sourceCandidate] = await Promise.all([
     prisma.followup.findMany({ where: { employeeId: id } }),
     prisma.timelineEvent.findMany({
       where: employeeRow.candidateId
@@ -25,6 +25,9 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
       include: { createdBy: { select: { name: true } } },
       orderBy: { occurredAt: "desc" },
     }),
+    employeeRow.candidateId
+      ? prisma.candidate.findUnique({ where: { id: employeeRow.candidateId }, select: { cvFileId: true } })
+      : Promise.resolve(null),
   ]);
 
   const employee = mapEmployee(employeeRow);
@@ -46,6 +49,7 @@ export default async function EmployeeProfilePage({ params }: { params: Promise<
       nextFollowupNote={nextFollowup?.note ?? null}
       nextFollowupDueAt={nextFollowup?.dueAt ?? null}
       timeline={timeline}
+      cvFileId={sourceCandidate?.cvFileId ?? undefined}
     />
   );
 }
