@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermissionUser } from "@/lib/session";
 import { canManageEmployees, canChangeEmployeeStatus, canRegisterIncident, canRegisterRecognition, canViewSalary } from "@/lib/permissions";
 import { logEvent } from "@/lib/history";
+import { parseLocalDate, parseLocalDateTime } from "@/lib/dates";
 import { EMPLOYEE_STATUS_LABELS, INCIDENT_LEVEL_LABELS, INCIDENT_TYPE_LABELS, RECOGNITION_TYPE_LABELS } from "@/lib/labels";
 import { createEmployeeSchema, changeEmployeeStatusSchema } from "@/lib/validations/employee";
 import { createIncidentSchema } from "@/lib/validations/incident";
@@ -59,13 +60,13 @@ export async function createEmployeeAction(_prevState: ActionState, formData: Fo
         lastName: data.lastName,
         companyId: data.companyId,
         position: data.position,
-        hireDate: new Date(data.hireDate),
+        hireDate: parseLocalDate(data.hireDate),
         phone: data.phone,
         whatsapp: data.whatsapp,
         email: data.email || undefined,
         dni: data.dni,
         cuil: data.cuil,
-        birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
+        birthDate: data.birthDate ? parseLocalDate(data.birthDate) : undefined,
         address: data.address,
         emergencyContactName: data.emergencyContactName,
         emergencyContactPhone: data.emergencyContactPhone,
@@ -171,7 +172,7 @@ export async function createIncidentAction(_prevState: ActionState, formData: Fo
       data: {
         employeeId: data.employeeId,
         companyId: employee.companyId,
-        occurredAt: new Date(data.occurredAt),
+        occurredAt: parseLocalDateTime(data.occurredAt),
         type: data.type,
         level: data.level,
         description: data.description,
@@ -187,7 +188,7 @@ export async function createIncidentAction(_prevState: ActionState, formData: Fo
       description: data.description,
       sourceType: "EmployeeIncident",
       sourceId: incident.id,
-      occurredAt: new Date(data.occurredAt),
+      occurredAt: parseLocalDateTime(data.occurredAt),
       createdById: user.id,
     });
   });
@@ -224,7 +225,7 @@ export async function createRecognitionAction(_prevState: ActionState, formData:
     const recognition = await tx.employeeRecognition.create({
       data: {
         employeeId: data.employeeId,
-        occurredAt: new Date(data.occurredAt),
+        occurredAt: parseLocalDateTime(data.occurredAt),
         type: data.type,
         description: data.description,
         recordedById: user.id,
@@ -238,7 +239,7 @@ export async function createRecognitionAction(_prevState: ActionState, formData:
       description: data.description,
       sourceType: "EmployeeRecognition",
       sourceId: recognition.id,
-      occurredAt: new Date(data.occurredAt),
+      occurredAt: parseLocalDateTime(data.occurredAt),
       createdById: user.id,
     });
   });

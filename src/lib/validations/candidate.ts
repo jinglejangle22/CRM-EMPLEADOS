@@ -32,6 +32,12 @@ export const createCandidateSchema = z.object({
 
 export type CreateCandidateInput = z.infer<typeof createCandidateSchema>;
 
+export const updateCandidateSchema = createCandidateSchema.extend({
+  candidateId: z.string().min(1),
+});
+
+export type UpdateCandidateInput = z.infer<typeof updateCandidateSchema>;
+
 export const changeCandidateStageSchema = z.object({
   candidateId: z.string().min(1),
   stage: z.enum([

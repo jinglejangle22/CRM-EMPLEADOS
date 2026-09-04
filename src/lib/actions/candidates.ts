@@ -6,8 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { requirePermissionUser } from "@/lib/session";
 import { canManageCandidates } from "@/lib/permissions";
 import { logEvent } from "@/lib/history";
+import { parseLocalDate } from "@/lib/dates";
 import { CANDIDATE_STAGE_LABELS } from "@/lib/labels";
-import { createCandidateSchema, changeCandidateStageSchema } from "@/lib/validations/candidate";
+import { createCandidateSchema, changeCandidateStageSchema, updateCandidateSchema } from "@/lib/validations/candidate";
 import { isUploadedFile, saveUploadedFile } from "@/lib/storage";
 
 export type ActionState = { error?: string; success?: boolean; employeeId?: string } | undefined;
@@ -62,7 +63,7 @@ export async function createCandidateAction(_prevState: ActionState, formData: F
         availability: data.availability,
         salaryExpectation: data.salaryExpectation,
         experience: data.experience,
-        birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
+        birthDate: data.birthDate ? parseLocalDate(data.birthDate) : undefined,
         cvReceivedDate: new Date(),
         createdById: user.id,
         photoFileId: photoFile?.id,
@@ -162,4 +163,70 @@ export async function changeCandidateStageAction(_prevState: ActionState, formDa
   if (result.employeeId) revalidatePath(`/empleados/${result.employeeId}`);
 
   return { success: true, employeeId: result.employeeId };
+}
+
+export async function updateCandidateAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await requirePermissionUser();
+  if (!canManageCandidates(user)) {
+    return { error: "No tenés permisos para editar candidatos." };
+  }
+
+  const parsed = updateCandidateSchema.safeParse({
+    candidateId: formData.get("candidateId"),
+    firstName: formData.get("firstName"),
+    lastName: formData.get("lastName"),
+    phone: formData.get("phone"),
+    email: formData.get("email"),
+    companyId: formData.get("companyId"),
+    position: formData.get("position"),
+    source: formData.get("source"),
+    zone: formData.get("zone"),
+    address: formData.get("address"),
+    availability: formData.get("availability"),
+    salaryExpectation: formData.get("salaryExpectation"),
+    experience: formData.get("experience"),
+    birthDate: formData.get("birthDate"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
+  }
+
+  const data = parsed.data;
+
+  const existing = await prisma.candidate.findUnique({ where: { id: data.candidateId } });
+  if (!existing) return { error: "El candidato no existe." };
+
+  const photo = formData.get("photo");
+  const cv = formData.get("cv");
+  const [photoFile, cvFile] = await Promise.all([
+    isUploadedFile(photo) ? saveUploadedFile(photo, { prefix: "candidatos/fotos", uploadedById: user.id }) : null,
+    isUploadedFile(cv) ? saveUploadedFile(cv, { prefix: "candidatos/cv", uploadedById: user.id }) : null,
+  ]);
+
+  await prisma.candidate.update({
+    where: { id: data.candidateId },
+    data: {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      email: data.email || undefined,
+      companyId: data.companyId,
+      position: data.position,
+      source: data.source,
+      zone: data.zone,
+      address: data.address,
+      availability: data.availability,
+      salaryExpectation: data.salaryExpectation,
+      experience: data.experience,
+      birthDate: data.birthDate ? parseLocalDate(data.birthDate) : undefined,
+      photoFileId: photoFile?.id,
+      cvFileId: cvFile?.id,
+    },
+  });
+
+  revalidatePath(`/candidatos/${data.candidateId}`);
+  revalidatePath("/candidatos");
+  revalidatePath("/dashboard");
+  redirect(`/candidatos/${data.candidateId}`);
 }

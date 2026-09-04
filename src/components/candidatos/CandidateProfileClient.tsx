@@ -60,6 +60,10 @@ export function CandidateProfileClient({
       router.push(`/agenda/nueva?candidateId=${candidate.id}`);
       return;
     }
+    if (key === "editar") {
+      router.push(`/candidatos/${candidate.id}/editar`);
+      return;
+    }
     setDialog(key as "interaccion" | "seguimiento" | "etapa");
   }
 

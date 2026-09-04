@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   Award,
   ArrowRightLeft,
+  Pencil,
   type LucideIcon,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -23,6 +24,7 @@ const CANDIDATE_ACTIONS: ProfileAction[] = [
   { key: "seguimiento", label: "Agendar seguimiento", description: "Recordatorio con fecha y hora", icon: Clock },
   { key: "entrevista", label: "Agendar entrevista", description: "Se agrega a la agenda", icon: CalendarPlus },
   { key: "etapa", label: "Cambiar etapa", description: "Mover en el pipeline de selección", icon: ArrowRightLeft },
+  { key: "editar", label: "Editar candidato", description: "Modificar datos del candidato", icon: Pencil },
 ];
 
 const EMPLEADO_ACTIONS: ProfileAction[] = [

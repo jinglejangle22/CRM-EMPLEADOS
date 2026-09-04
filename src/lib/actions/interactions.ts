@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermissionUser } from "@/lib/session";
 import { canRegisterInteraction } from "@/lib/permissions";
 import { logEvent } from "@/lib/history";
+import { parseLocalDateTime } from "@/lib/dates";
 import { INTERACTION_RESULT_LABELS, INTERACTION_TYPE_LABELS } from "@/lib/labels";
 import { createInteractionSchema } from "@/lib/validations/interaction";
 import type { ActionState } from "@/lib/actions/candidates";
@@ -50,7 +51,7 @@ export async function createInteractionAction(_prevState: ActionState, formData:
         note: data.note,
         occurredAt: new Date(),
         userId: user.id,
-        nextFollowUpAt: data.nextFollowUpAt ? new Date(data.nextFollowUpAt) : undefined,
+        nextFollowUpAt: data.nextFollowUpAt ? parseLocalDateTime(data.nextFollowUpAt) : undefined,
       },
     });
 
@@ -70,7 +71,7 @@ export async function createInteractionAction(_prevState: ActionState, formData:
         data: {
           candidateId: data.candidateId,
           employeeId: data.employeeId,
-          dueAt: new Date(data.nextFollowUpAt),
+          dueAt: parseLocalDateTime(data.nextFollowUpAt),
           note: data.note ?? "Volver a contactar",
           createdById: user.id,
         },

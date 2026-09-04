@@ -6,8 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { requirePermissionUser } from "@/lib/session";
 import { canManageCandidates } from "@/lib/permissions";
 import { logEvent } from "@/lib/history";
+import { parseLocalDateTime } from "@/lib/dates";
 import { INTERVIEW_MODALITY_LABELS, INTERVIEW_STATUS_LABELS } from "@/lib/labels";
-import { createInterviewSchema, updateInterviewStatusSchema } from "@/lib/validations/interview";
+import { createInterviewSchema, updateInterviewStatusSchema, updateInterviewSchema } from "@/lib/validations/interview";
 import type { ActionState } from "@/lib/actions/candidates";
 
 const STAGE_ORDER = [
@@ -53,7 +54,7 @@ export async function createInterviewAction(_prevState: ActionState, formData: F
         candidateId: data.candidateId,
         companyId: data.companyId,
         position: data.position,
-        startsAt: new Date(data.startsAt),
+        startsAt: parseLocalDateTime(data.startsAt),
         modality: data.modality,
         address: data.address,
         notes: data.notes,
@@ -121,4 +122,53 @@ export async function updateInterviewStatusAction(_prevState: ActionState, formD
   revalidatePath("/dashboard");
 
   return { success: true };
+}
+
+export async function updateInterviewAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const user = await requirePermissionUser();
+  if (!canManageCandidates(user)) {
+    return { error: "No tenés permisos para editar entrevistas." };
+  }
+
+  const parsed = updateInterviewSchema.safeParse({
+    interviewId: formData.get("interviewId"),
+    position: formData.get("position"),
+    startsAt: formData.get("startsAt"),
+    modality: formData.get("modality"),
+    address: formData.get("address"),
+    notes: formData.get("notes"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
+  }
+  const data = parsed.data;
+
+  const interview = await prisma.interview.findUnique({ where: { id: data.interviewId } });
+  if (!interview) return { error: "La entrevista no existe." };
+
+  await prisma.$transaction(async (tx) => {
+    await tx.interview.update({
+      where: { id: data.interviewId },
+      data: {
+        position: data.position,
+        startsAt: parseLocalDateTime(data.startsAt),
+        modality: data.modality,
+        address: data.address,
+        notes: data.notes,
+      },
+    });
+
+    await logEvent(tx, {
+      candidateId: interview.candidateId,
+      type: "INTERVIEW_UPDATED",
+      title: "Entrevista modificada",
+      description: `${data.position} · ${INTERVIEW_MODALITY_LABELS[data.modality]}`,
+      createdById: user.id,
+    });
+  });
+
+  revalidatePath("/agenda");
+  revalidatePath(`/candidatos/${interview.candidateId}`);
+  revalidatePath("/dashboard");
+  redirect(`/candidatos/${interview.candidateId}`);
 }

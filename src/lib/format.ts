@@ -31,6 +31,18 @@ export function formatDateTimeLong(iso: string): string {
   return format(new Date(iso), "d 'de' MMMM, HH:mm", { locale: es });
 }
 
+/** Formatea un ISO guardado en UTC como valor para <input type="datetime-local">.
+ * Debe llamarse en el cliente (hora local del navegador = hora de Argentina). */
+export function toDateTimeLocalValue(iso: string): string {
+  return format(new Date(iso), "yyyy-MM-dd'T'HH:mm");
+}
+
+/** Formatea un ISO guardado en UTC como valor para <input type="date">.
+ * Debe llamarse en el cliente (hora local del navegador = hora de Argentina). */
+export function toDateInputValue(iso: string): string {
+  return format(new Date(iso), "yyyy-MM-dd");
+}
+
 export function relativeDayLabel(iso: string): string {
   const date = new Date(iso);
   if (isToday(date)) return `Hoy ${format(date, "HH:mm")}`;

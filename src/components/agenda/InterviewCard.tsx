@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { MapPin, Video, User } from "lucide-react";
+import { MapPin, Video, User, Pencil } from "lucide-react";
 import type { Interview } from "@/types";
 import { useAppState } from "@/lib/app-state";
 import { StatusBadge, interviewStatusMeta } from "@/components/shared/StatusBadge";
@@ -75,6 +75,16 @@ export function InterviewCard({ interview }: { interview: Interview }) {
 
       <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
         <WhatsappButton phone={candidate.phone} message={message} label="Recordatorio" compact className="flex-1" />
+        {canManageCandidates(permissionUser) && (
+          <button
+            type="button"
+            onClick={() => router.push(`/agenda/${interview.id}/editar`)}
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600 active:bg-neutral-200"
+            aria-label="Editar entrevista"
+          >
+            <Pencil className="size-4" />
+          </button>
+        )}
         {canManageCandidates(permissionUser) && (
           <form action={formAction} className="shrink-0">
             <input type="hidden" name="interviewId" value={interview.id} />

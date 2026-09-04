@@ -22,3 +22,14 @@ export const updateInterviewStatusSchema = z.object({
   interviewId: z.string().min(1),
   status: z.enum(["PENDIENTE", "CONFIRMADA", "REPROGRAMADA", "CANCELADA", "SE_PRESENTO", "NO_SE_PRESENTO"]),
 });
+
+export const updateInterviewSchema = z.object({
+  interviewId: z.string().min(1),
+  position: z.string().trim().min(1, "El puesto es obligatorio"),
+  startsAt: z.string().trim().min(1, "La fecha y hora son obligatorias"),
+  modality: z.enum(["PRESENCIAL", "VIRTUAL"]),
+  address: optionalString,
+  notes: optionalString,
+});
+
+export type UpdateInterviewInput = z.infer<typeof updateInterviewSchema>;
