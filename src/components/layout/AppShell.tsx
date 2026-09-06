@@ -20,7 +20,12 @@ export function AppShell({
   return (
     <AppStateProvider user={user} companies={companies}>
       <TopBar />
-      <main className="mx-auto w-full max-w-md flex-1 pb-24">{children}</main>
+      <main
+        className="mx-auto w-full max-w-[1100px] flex-1"
+        style={{ paddingBottom: "calc(9rem + env(safe-area-inset-bottom))" }}
+      >
+        {children}
+      </main>
       <BottomNav onMoreClick={() => setMoreOpen(true)} />
       <MoreSheet open={moreOpen} onOpenChange={setMoreOpen} />
     </AppStateProvider>

@@ -22,14 +22,14 @@ export function UsuariosPageClient({ users, companies }: { users: UserRow[]; com
   const [editing, setEditing] = useState<UserRow | null>(null);
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-8 pt-4">
+    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-4 px-4 pb-8 pt-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-neutral-900">Usuarios</h1>
+        <h1 className="text-2xl font-bold text-neutral-900">Usuarios</h1>
         <button
           onClick={() => setCreating(true)}
-          className="flex items-center gap-1.5 rounded-full bg-violet-600 px-3 py-1.5 text-xs font-medium text-white active:bg-violet-700"
+          className="flex h-11 items-center gap-1.5 rounded-full bg-violet-600 px-4 text-sm font-semibold text-white active:bg-violet-700"
         >
-          <Plus className="size-3.5" />
+          <Plus className="size-4" />
           Nuevo
         </button>
       </div>
@@ -39,17 +39,17 @@ export function UsuariosPageClient({ users, companies }: { users: UserRow[]; com
           <button
             key={u.id}
             onClick={() => setEditing(u)}
-            className="flex flex-col gap-1.5 rounded-2xl bg-white p-3.5 text-left ring-1 ring-neutral-100 active:bg-neutral-50"
+            className="flex flex-col gap-1.5 rounded-2xl border border-neutral-200 bg-white p-4 text-left active:bg-neutral-50"
           >
             <div className="flex items-center justify-between gap-2">
-              <p className="truncate text-sm font-semibold text-neutral-900">{u.name}</p>
-              <span className="shrink-0 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600">
+              <p className="truncate text-[15px] font-semibold text-neutral-900">{u.name}</p>
+              <span className="shrink-0 rounded-full bg-neutral-100 px-2.5 py-1 text-sm font-medium text-neutral-600">
                 {ROLE_LABELS[u.role]}
               </span>
             </div>
-            <p className="truncate text-xs text-neutral-500">{u.email}</p>
+            <p className="truncate text-sm text-neutral-500">{u.email}</p>
             {u.companyIds.length > 0 && (
-              <p className="truncate text-xs text-neutral-400">
+              <p className="truncate text-sm text-neutral-400">
                 {u.companyIds
                   .map((id) => companies.find((c) => c.id === id)?.shortName)
                   .filter(Boolean)

@@ -105,8 +105,8 @@ export default async function AlertasPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-8 pt-4">
-      <h1 className="text-lg font-semibold text-neutral-900">Alertas</h1>
+    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-4 px-4 pb-8 pt-4">
+      <h1 className="text-2xl font-bold text-neutral-900">Alertas</h1>
 
       <AlertSection title="Seguimientos" icon={Clock} rows={seguimientos} empty="No hay seguimientos pendientes." />
       <AlertSection title="Entrevistas próximas" icon={CalendarClock} rows={entrevistas} empty="No hay entrevistas en los próximos 7 días." />
@@ -129,20 +129,20 @@ function AlertSection({
 }) {
   return (
     <section className="rounded-2xl bg-white p-3 ring-1 ring-neutral-100">
-      <h2 className="flex items-center gap-2 px-1 pb-2 text-sm font-semibold text-neutral-900">
+      <h2 className="flex items-center gap-2 px-1 pb-2 text-[15px] font-semibold text-neutral-900">
         <Icon className="size-4 text-neutral-500" />
         {title}
-        <span className="ml-auto text-xs font-normal text-neutral-400">{rows.length}</span>
+        <span className="ml-auto text-sm font-medium text-neutral-400">{rows.length}</span>
       </h2>
       {rows.length === 0 ? (
         <p className="px-1 py-2 text-sm text-neutral-400">{empty}</p>
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-col divide-y divide-neutral-100">
           {rows.map((row) => (
             <Link
               key={row.key}
               href={row.href}
-              className="flex items-center gap-3 rounded-xl px-1 py-2.5 text-left active:bg-neutral-50"
+              className="flex min-h-14 items-center gap-3 px-1 py-2.5 text-left active:bg-neutral-50"
             >
               <span
                 className={cn(
@@ -151,8 +151,8 @@ function AlertSection({
                 )}
               />
               <span className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-neutral-800">{row.title}</p>
-                <p className="truncate text-xs text-neutral-500">{row.subtitle}</p>
+                <p className="truncate text-[15px] font-medium text-neutral-800">{row.title}</p>
+                <p className="truncate text-sm text-neutral-500">{row.subtitle}</p>
               </span>
               <ChevronRight className="size-4 shrink-0 text-neutral-300" />
             </Link>

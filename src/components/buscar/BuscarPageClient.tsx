@@ -29,8 +29,8 @@ export function BuscarPageClient({ candidates, employees }: { candidates: Candid
   const hasResults = matchingCandidates.length > 0 || matchingEmployees.length > 0;
 
   return (
-    <div className="flex flex-col gap-3 px-4 pt-4 pb-8">
-      <h1 className="text-lg font-semibold text-neutral-900">Buscar</h1>
+    <div className="mx-auto flex w-full max-w-[950px] flex-col gap-3 px-4 pt-4 pb-8">
+      <h1 className="text-2xl font-bold text-neutral-900">Buscar</h1>
 
       <Input
         autoFocus
@@ -53,19 +53,23 @@ export function BuscarPageClient({ candidates, employees }: { candidates: Candid
 
       {matchingCandidates.length > 0 && (
         <section className="flex flex-col gap-2.5">
-          <h2 className="px-1 text-sm font-semibold text-neutral-900">Candidatos ({matchingCandidates.length})</h2>
-          {matchingCandidates.map((c) => (
-            <CandidateCard key={c.id} candidate={c} />
-          ))}
+          <h2 className="px-1 text-[15px] font-semibold text-neutral-900">Candidatos ({matchingCandidates.length})</h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {matchingCandidates.map((c) => (
+              <CandidateCard key={c.id} candidate={c} />
+            ))}
+          </div>
         </section>
       )}
 
       {matchingEmployees.length > 0 && (
         <section className="flex flex-col gap-2.5">
-          <h2 className="px-1 text-sm font-semibold text-neutral-900">Empleados ({matchingEmployees.length})</h2>
-          {matchingEmployees.map((e) => (
-            <EmployeeCard key={e.id} employee={e} />
-          ))}
+          <h2 className="px-1 text-[15px] font-semibold text-neutral-900">Empleados ({matchingEmployees.length})</h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {matchingEmployees.map((e) => (
+              <EmployeeCard key={e.id} employee={e} />
+            ))}
+          </div>
         </section>
       )}
     </div>

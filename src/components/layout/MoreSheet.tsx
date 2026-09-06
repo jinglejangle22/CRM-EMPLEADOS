@@ -15,11 +15,15 @@ export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-3xl px-4 pb-6">
-        <SheetHeader className="px-0 pt-2">
+      <SheetContent
+        side="bottom"
+        className="rounded-t-3xl px-2 pb-2"
+        style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
+      >
+        <SheetHeader className="px-4 pt-2 pb-1">
           <SheetTitle>Más</SheetTitle>
         </SheetHeader>
-        <div className="flex flex-col gap-1 pb-2">
+        <div className="flex flex-col divide-y divide-neutral-100 px-2 pb-2">
           {items.map((item) => (
             <button
               key={item.label}
@@ -27,14 +31,14 @@ export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
                 onOpenChange(false);
                 router.push(item.href);
               }}
-              className="flex items-center gap-3 rounded-2xl p-3 text-left active:bg-neutral-100"
+              className="flex min-h-16 items-center gap-3.5 px-2 text-left active:bg-neutral-50"
             >
               <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700">
                 <item.icon className="size-5" />
               </span>
-              <span>
-                <span className="block text-sm font-medium text-neutral-900">{item.label}</span>
-                <span className="block text-xs text-neutral-500">{item.description}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[15px] font-semibold text-neutral-900">{item.label}</span>
+                <span className="block text-sm text-neutral-500">{item.description}</span>
               </span>
             </button>
           ))}
@@ -43,12 +47,12 @@ export function MoreSheet({ open, onOpenChange }: { open: boolean; onOpenChange:
               onOpenChange(false);
               logoutAction();
             }}
-            className="mt-2 flex items-center gap-3 rounded-2xl p-3 text-left text-rose-600 active:bg-rose-50"
+            className="flex min-h-16 items-center gap-3.5 px-2 text-left text-rose-600 active:bg-rose-50"
           >
             <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-rose-50">
               <LogOut className="size-5" />
             </span>
-            <span className="text-sm font-medium">Cerrar sesión</span>
+            <span className="text-[15px] font-semibold">Cerrar sesión</span>
           </button>
         </div>
       </SheetContent>

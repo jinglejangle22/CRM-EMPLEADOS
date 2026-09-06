@@ -11,15 +11,16 @@ export function BottomNav({ onMoreClick }: { onMoreClick: () => void }) {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)]"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 backdrop-blur"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Navegación principal"
     >
-      <div className="pointer-events-none absolute inset-x-0 -top-6 flex justify-center">
+      <div className="pointer-events-none absolute inset-x-0 -top-7 flex justify-center">
         <div className="pointer-events-auto">
           <FabMenu />
         </div>
       </div>
-      <div className="mx-auto grid max-w-md grid-cols-5 items-center px-1">
+      <div className="mx-auto grid h-[68px] max-w-[1100px] grid-cols-5 items-stretch px-1">
         <NavItem href="/dashboard" label="Inicio" Icon={Home} active={pathname.startsWith("/dashboard")} />
         <NavItem href="/candidatos" label="Candidatos" Icon={Users} active={pathname.startsWith("/candidatos")} />
         <NavItem href="/empleados" label="Empleados" Icon={UserSquare2} active={pathname.startsWith("/empleados")} />
@@ -45,7 +46,7 @@ function NavItem({
     <Link
       href={href}
       className={cn(
-        "flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium",
+        "flex flex-col items-center justify-center gap-1 text-[11px] font-semibold",
         active ? "text-violet-600" : "text-neutral-500"
       )}
     >
@@ -60,7 +61,7 @@ function MoreButton({ onClick, active }: { onClick: () => void; active: boolean 
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium",
+        "flex flex-col items-center justify-center gap-1 text-[11px] font-semibold",
         active ? "text-violet-600" : "text-neutral-500"
       )}
     >

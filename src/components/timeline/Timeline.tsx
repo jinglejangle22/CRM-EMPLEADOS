@@ -68,31 +68,29 @@ export function Timeline({ events }: { events: TimelineEvent[] }) {
   const groups = groupByDay(events);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       {groups.map(([day, dayEvents]) => (
         <div key={day}>
-          <p className="mb-2 text-xs font-semibold tracking-wide text-neutral-400">{day}</p>
-          <ol className="flex flex-col gap-3 border-l border-neutral-200 pl-4">
+          <p className="mb-3 text-[13px] font-semibold tracking-wide text-neutral-400">{day}</p>
+          <ol className="flex flex-col gap-4 border-l border-neutral-200 pl-4">
             {dayEvents.map((event) => {
               const Icon = event.type === "INTERACTION" ? interactionIcon(event.title) : iconByType[event.type];
               return (
                 <li key={event.id} className="relative">
                   <span
                     className={cn(
-                      "absolute -left-[1.45rem] flex size-6 items-center justify-center rounded-full ring-4 ring-white",
+                      "absolute -left-[1.55rem] flex size-7 items-center justify-center rounded-full ring-4 ring-white",
                       toneByType[event.type]
                     )}
                   >
-                    <Icon className="size-3.5" />
+                    <Icon className="size-4" />
                   </span>
-                  <div className="rounded-xl bg-neutral-50 px-3 py-2">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <p className="text-sm font-medium text-neutral-900">{event.title}</p>
-                      <span className="shrink-0 text-[11px] text-neutral-400">{formatTime(event.occurredAt)}</span>
-                    </div>
-                    {event.description && <p className="mt-0.5 text-xs text-neutral-500">{event.description}</p>}
-                    <p className="mt-1 text-[11px] text-neutral-400">{event.createdByName}</p>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-[15px] font-semibold text-neutral-900">{event.title}</p>
+                    <span className="shrink-0 text-sm text-neutral-400">{formatTime(event.occurredAt)}</span>
                   </div>
+                  {event.description && <p className="mt-0.5 text-sm text-neutral-600">{event.description}</p>}
+                  <p className="mt-1 text-sm text-neutral-400">{event.createdByName}</p>
                 </li>
               );
             })}

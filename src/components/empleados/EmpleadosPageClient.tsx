@@ -47,27 +47,27 @@ export function EmpleadosPageClient({ employees }: { employees: Employee[] }) {
   }, [scoped, activeChip, query]);
 
   return (
-    <div className="flex flex-col gap-3 px-4 pt-4">
+    <div className="mx-auto flex w-full max-w-[950px] flex-col gap-3 px-4 pt-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-neutral-900">Empleados</h1>
-        <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+        <h1 className="text-2xl font-bold text-neutral-900">Empleados</h1>
+        <span className="flex min-h-7 items-center gap-1 rounded-full bg-emerald-50 px-3 text-[13px] font-semibold text-emerald-700">
           <Users className="size-3.5" />
           {scoped.length}
         </span>
       </div>
 
       <Input
-        placeholder="Buscar por nombre o puesto..."
+        placeholder="Buscar empleados..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="h-11 rounded-xl bg-white text-sm"
+        className="h-12 rounded-xl bg-white text-base"
       />
 
       <PipelineFilterChips chips={chips} activeKey={activeChip} onSelect={setActiveChip} />
 
-      <div className="flex flex-col gap-2.5 pb-4">
+      <div className="grid grid-cols-1 gap-3 pb-4 md:grid-cols-2 xl:grid-cols-3">
         {filtered.length === 0 && (
-          <p className="py-10 text-center text-sm text-neutral-400">No hay empleados para este filtro.</p>
+          <p className="col-span-full py-10 text-center text-sm text-neutral-400">No hay empleados para este filtro.</p>
         )}
         {filtered.map((employee) => (
           <EmployeeCard key={employee.id} employee={employee} />

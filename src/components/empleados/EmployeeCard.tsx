@@ -21,28 +21,28 @@ export function EmployeeCard({ employee }: { employee: Employee }) {
       onKeyDown={(e) => {
         if (e.key === "Enter") router.push(`/empleados/${employee.id}`);
       }}
-      className="flex w-full flex-col gap-2.5 rounded-2xl bg-white p-3.5 text-left ring-1 ring-neutral-100 active:bg-neutral-50"
+      className="flex w-full flex-col gap-3 rounded-2xl border border-neutral-200 bg-white p-4 text-left active:bg-neutral-50"
     >
       <div className="flex items-start gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-700">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[15px] font-semibold text-emerald-700">
           {initials(employee.firstName, employee.lastName)}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-neutral-900">
+          <p className="truncate text-[17px] font-semibold text-neutral-900">
             {employee.firstName} {employee.lastName}
           </p>
-          <p className="truncate text-xs text-neutral-500">
+          <p className="mt-0.5 line-clamp-2 text-sm text-neutral-600">
             {employee.position} · {company?.shortName}
+            {employee.shift ? ` · Turno ${employee.shift}` : ""}
           </p>
-          {employee.shift && <p className="truncate text-[11px] text-neutral-400">Turno {employee.shift}</p>}
+          <div className="mt-2">{statusMeta && <StatusBadge label={statusMeta.label} tone={statusMeta.tone} />}</div>
         </div>
-        {statusMeta && <StatusBadge label={statusMeta.label} tone={statusMeta.tone} />}
       </div>
 
       {employee.phone && (
         <div className="flex items-center gap-2">
           <WhatsappButton phone={employee.phone} compact className="flex-1" />
-          <span className="flex h-9 flex-1 items-center justify-center rounded-xl bg-neutral-100 text-xs font-medium text-neutral-600">
+          <span className="flex h-11 flex-1 items-center justify-center rounded-xl bg-neutral-100 text-sm font-semibold text-neutral-700">
             Ver legajo
           </span>
         </div>

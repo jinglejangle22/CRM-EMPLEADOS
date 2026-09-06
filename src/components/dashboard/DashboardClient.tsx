@@ -122,15 +122,19 @@ export function DashboardClient({
     }, {});
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-4">
+    <div className="flex flex-col gap-4 px-4 pt-4 pb-2 md:gap-5">
       <div>
-        <p className="text-sm text-neutral-500">Hola, {currentUser.name.split(" ")[0]} 👋</p>
-        <h1 className="text-xl font-semibold text-neutral-900">Tu día de un vistazo</h1>
+        <p className="text-[15px] font-medium text-neutral-500">Hola, {currentUser.name.split(" ")[0]} 👋</p>
+        <h1 className="text-2xl font-bold text-neutral-900">Tu día de un vistazo</h1>
       </div>
 
-      <StatList title="Pendientes" items={pendientes} />
-      <CompanyStatGrid total={totalActivos} countByCompanyId={countByCompanyId} />
-      <StatList title="Hoy" items={hoy} />
+      <StatList title="Pendientes" items={pendientes} zeroLabel="Sin pendientes" />
+
+      <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:items-start md:gap-5">
+        <CompanyStatGrid total={totalActivos} countByCompanyId={countByCompanyId} />
+        <StatList title="Hoy" items={hoy} />
+      </div>
+
       <StatList title="Selección" items={seleccion} />
     </div>
   );

@@ -9,9 +9,9 @@ export function SearchTrigger() {
     <button
       onClick={() => router.push("/buscar")}
       aria-label="Buscar"
-      className="flex size-9 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 active:bg-neutral-200"
+      className="flex size-11 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 active:bg-neutral-200"
     >
-      <Search className="size-4.5" />
+      <Search className="size-5" />
     </button>
   );
 }

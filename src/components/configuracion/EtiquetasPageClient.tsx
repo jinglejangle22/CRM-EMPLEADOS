@@ -15,8 +15,8 @@ const initialState: ActionState = undefined;
 
 export function EtiquetasPageClient({ tags, companies }: { tags: Tag[]; companies: Company[] }) {
   return (
-    <div className="flex flex-col gap-4 px-4 pb-8 pt-4">
-      <h1 className="text-lg font-semibold text-neutral-900">Etiquetas</h1>
+    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-4 px-4 pb-8 pt-4">
+      <h1 className="text-2xl font-bold text-neutral-900">Etiquetas</h1>
 
       <CreateTagForm companies={companies} />
 
@@ -67,15 +67,15 @@ function CreateTagForm({ companies }: { companies: Company[] }) {
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="name">Nombre</Label>
-          <Input id="name" name="name" required className="h-11 rounded-xl text-sm" />
+          <Input id="name" name="name" required className="h-12 rounded-xl text-base" />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="category">Categoría</Label>
-          <Input id="category" name="category" className="h-11 rounded-xl text-sm" />
+          <Input id="category" name="category" className="h-12 rounded-xl text-base" />
         </div>
       </div>
       {state?.error && <p className="text-sm text-rose-600">{state.error}</p>}
-      <Button type="submit" disabled={pending} className="h-11 rounded-xl text-sm">
+      <Button type="submit" disabled={pending} className="h-12 rounded-xl text-base">
         {pending ? "Guardando..." : "Agregar etiqueta"}
       </Button>
     </form>
@@ -91,11 +91,16 @@ function TagChip({ tag }: { tag: Tag }) {
   }, [state, router]);
 
   return (
-    <form action={formAction} className="flex items-center gap-1.5 rounded-full bg-neutral-100 px-2.5 py-1 text-xs text-neutral-600">
+    <form action={formAction} className="flex items-center gap-1.5 rounded-full bg-neutral-100 py-1.5 pr-1.5 pl-3 text-sm font-medium text-neutral-600">
       <input type="hidden" name="tagId" value={tag.id} />
       {tag.name}
-      <button type="submit" disabled={pending} aria-label={`Eliminar ${tag.name}`} className="text-neutral-400 active:text-rose-600">
-        <Trash2 className="size-3" />
+      <button
+        type="submit"
+        disabled={pending}
+        aria-label={`Eliminar ${tag.name}`}
+        className="flex size-6 items-center justify-center rounded-full text-neutral-400 active:bg-neutral-200 active:text-rose-600"
+      >
+        <Trash2 className="size-3.5" />
       </button>
     </form>
   );

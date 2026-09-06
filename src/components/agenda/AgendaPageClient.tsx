@@ -129,18 +129,18 @@ export function AgendaPageClient({ interviews }: { interviews: Interview[] }) {
   }, [cursor]);
 
   return (
-    <div className="flex flex-col gap-3 px-4 pt-4">
+    <div className="mx-auto flex w-full max-w-[1000px] flex-col gap-3 px-4 pt-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-neutral-900">Agenda</h1>
+        <h1 className="text-2xl font-bold text-neutral-900">Agenda</h1>
       </div>
 
-      <div className="flex gap-2 rounded-xl bg-neutral-100 p-1">
+      <div className="flex h-12 gap-1 rounded-xl bg-neutral-100 p-1">
         {(["dia", "semana", "mes"] as ViewMode[]).map((mode) => (
           <button
             key={mode}
             onClick={() => setView(mode)}
             className={cn(
-              "h-9 flex-1 rounded-lg text-sm font-medium capitalize",
+              "flex-1 rounded-lg text-sm font-semibold capitalize",
               view === mode ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"
             )}
           >
@@ -149,19 +149,19 @@ export function AgendaPageClient({ interviews }: { interviews: Interview[] }) {
         ))}
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <button
           type="button"
           onClick={goPrev}
           aria-label="Anterior"
-          className="flex size-8 items-center justify-center rounded-lg text-neutral-500 active:bg-neutral-100"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-100"
         >
           <ChevronLeft className="size-5" />
         </button>
         <button
           type="button"
           onClick={goToday}
-          className="flex-1 truncate px-2 text-center text-sm font-semibold capitalize text-neutral-900"
+          className="min-h-11 flex-1 truncate px-2 text-center text-[15px] font-semibold capitalize text-neutral-900"
         >
           {headerLabel}
         </button>
@@ -169,7 +169,7 @@ export function AgendaPageClient({ interviews }: { interviews: Interview[] }) {
           type="button"
           onClick={goNext}
           aria-label="Siguiente"
-          className="flex size-8 items-center justify-center rounded-lg text-neutral-500 active:bg-neutral-100"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-100"
         >
           <ChevronRight className="size-5" />
         </button>
@@ -235,18 +235,18 @@ export function AgendaPageClient({ interviews }: { interviews: Interview[] }) {
                   type="button"
                   key={key}
                   onClick={() => selectDay(day)}
-                  className="flex flex-col items-center gap-1 rounded-xl py-2 text-xs text-neutral-500"
+                  className="flex min-h-16 min-w-10 flex-col items-center gap-1 rounded-xl py-2 text-xs font-medium text-neutral-500"
                 >
                   <span className="uppercase">{format(day, "EEEEE", { locale: es })}</span>
                   <span
                     className={cn(
-                      "flex size-7 items-center justify-center rounded-full text-sm font-semibold text-neutral-900",
+                      "flex size-9 items-center justify-center rounded-full text-[15px] font-semibold text-neutral-900",
                       today && "bg-violet-600 text-white"
                     )}
                   >
                     {format(day, "d")}
                   </span>
-                  <span className={cn("size-1 rounded-full", count > 0 ? "bg-violet-500" : "bg-transparent")} />
+                  <span className={cn("size-1.5 rounded-full", count > 0 ? "bg-violet-500" : "bg-transparent")} />
                 </button>
               );
             })}

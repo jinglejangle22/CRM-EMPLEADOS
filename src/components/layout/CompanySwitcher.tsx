@@ -21,17 +21,21 @@ export function CompanySwitcher() {
     <Sheet open={open} onOpenChange={setOpen}>
       <button
         onClick={() => setOpen(true)}
-        className="flex h-9 items-center gap-1.5 rounded-full bg-neutral-100 pl-2.5 pr-2 text-sm font-medium text-neutral-800 active:bg-neutral-200"
+        className="flex h-11 max-w-[60%] items-center gap-1.5 rounded-full bg-neutral-100 pl-3 pr-2.5 text-[15px] font-semibold text-neutral-900 active:bg-neutral-200"
       >
-        <Building2 className="size-4 text-neutral-500" />
-        <span className="max-w-[38vw] truncate">{activeLabel}</span>
-        <ChevronDown className="size-4 text-neutral-400" />
+        <Building2 className="size-4.5 shrink-0 text-neutral-500" />
+        <span className="truncate">{activeLabel}</span>
+        <ChevronDown className="size-4.5 shrink-0 text-neutral-400" />
       </button>
-      <SheetContent side="bottom" className="rounded-t-3xl px-4 pb-6">
-        <SheetHeader className="px-0 pt-2">
+      <SheetContent
+        side="bottom"
+        className="rounded-t-3xl px-2 pb-2"
+        style={{ paddingBottom: "calc(0.5rem + env(safe-area-inset-bottom))" }}
+      >
+        <SheetHeader className="px-4 pt-2 pb-1">
           <SheetTitle>Ver empresa</SheetTitle>
         </SheetHeader>
-        <div className="flex flex-col gap-1 pb-2">
+        <div className="flex flex-col divide-y divide-neutral-100 px-2 pb-2">
           {canSeeAll && (
             <CompanyOption
               label="Todas las empresas"
@@ -76,13 +80,13 @@ function CompanyOption({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 rounded-2xl p-3 text-left active:bg-neutral-100",
+        "flex min-h-14 items-center gap-3 px-2 text-left active:bg-neutral-50",
         selected && "bg-violet-50"
       )}
     >
       <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: colorHex }} />
-      <span className="flex-1 text-sm font-medium text-neutral-900">{label}</span>
-      {selected && <Check className="size-4 text-violet-600" />}
+      <span className="flex-1 text-[15px] font-semibold text-neutral-900">{label}</span>
+      {selected && <Check className="size-4.5 text-violet-600" />}
     </button>
   );
 }

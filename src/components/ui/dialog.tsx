@@ -65,12 +65,12 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-2 right-2"
+                className="absolute top-1.5 right-1.5 size-11"
                 size="icon-sm"
               />
             }
           >
-            <XIcon
+            <XIcon className="size-5"
             />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
@@ -122,7 +122,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        "font-heading text-base leading-none font-medium",
+        "font-heading text-lg leading-none font-bold",
         className
       )}
       {...props}

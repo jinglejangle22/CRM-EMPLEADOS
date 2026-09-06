@@ -12,11 +12,11 @@ export function NextEventBanner({
 }) {
   const Icon = kind === "interview" ? CalendarClock : Clock;
   return (
-    <div className="mx-4 flex items-center gap-2.5 rounded-xl bg-amber-50 px-3.5 py-2.5 text-amber-800">
-      <Icon className="size-4 shrink-0" />
+    <div className="mx-4 flex min-h-14 items-center gap-3 rounded-xl bg-amber-50 px-4 py-3 text-amber-800">
+      <Icon className="size-4.5 shrink-0" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold">{label}</p>
-        <p className="truncate text-[11px] text-amber-700">{relativeDayLabel(when)}</p>
+        <p className="truncate text-sm font-semibold">{label}</p>
+        <p className="truncate text-sm text-amber-700">{relativeDayLabel(when)}</p>
       </div>
     </div>
   );

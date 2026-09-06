@@ -24,12 +24,12 @@ export function WhatsappButton({
       rel="noopener noreferrer"
       onClick={(e) => e.stopPropagation()}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-medium active:bg-emerald-100",
-        compact ? "h-9 px-3 text-xs" : "h-11 px-4 text-sm",
+        "inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 font-semibold text-emerald-700 active:bg-emerald-100",
+        compact ? "h-11 px-3.5 text-sm" : "h-12 px-4 text-[15px]",
         className
       )}
     >
-      <MessageCircle className="size-4" />
+      <MessageCircle className="size-4.5" />
       {label}
     </a>
   );

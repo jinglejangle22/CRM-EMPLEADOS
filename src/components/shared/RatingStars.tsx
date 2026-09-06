@@ -9,7 +9,7 @@ export function RatingStars({ rating, className }: { rating?: number; className?
         <Star
           key={i}
           className={cn(
-            "size-3.5",
+            "size-4",
             i < rating ? "fill-amber-400 text-amber-400" : "fill-neutral-200 text-neutral-200"
           )}
         />

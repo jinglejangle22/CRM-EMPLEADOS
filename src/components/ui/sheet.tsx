@@ -65,12 +65,12 @@ function SheetContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-3 right-3"
+                className="absolute top-2 right-2 size-11"
                 size="icon-sm"
               />
             }
           >
-            <XIcon
+            <XIcon className="size-5"
             />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
@@ -105,7 +105,7 @@ function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
     <SheetPrimitive.Title
       data-slot="sheet-title"
       className={cn(
-        "font-heading text-base font-medium text-foreground",
+        "font-heading text-lg font-bold text-foreground",
         className
       )}
       {...props}

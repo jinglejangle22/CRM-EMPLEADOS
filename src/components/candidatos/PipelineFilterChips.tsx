@@ -26,14 +26,14 @@ export function PipelineFilterChips({
             key={chip.key}
             onClick={() => onSelect(chip.key)}
             className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-medium whitespace-nowrap",
+              "flex h-10 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold whitespace-nowrap",
               active ? "bg-violet-600 text-white" : "bg-white text-neutral-600 ring-1 ring-neutral-200"
             )}
           >
             {chip.label}
             <span
               className={cn(
-                "rounded-full px-1.5 text-[11px]",
+                "rounded-full px-1.5 text-xs font-semibold",
                 active ? "bg-white/20" : "bg-neutral-100 text-neutral-500"
               )}
             >

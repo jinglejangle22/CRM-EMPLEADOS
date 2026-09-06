@@ -22,30 +22,35 @@ export function QuickActionsRow({
     <>
       <div className="grid grid-cols-4 gap-2 px-4">
         {phone ? (
-          <WhatsappButton phone={phone} message={whatsappMessage} label="WhatsApp" className="w-full" />
+          <WhatsappButton
+            phone={phone}
+            message={whatsappMessage}
+            label="WhatsApp"
+            className="h-14 w-full flex-col gap-1 border-0 px-0 text-xs"
+          />
         ) : (
           <span />
         )}
         <a
           href={phone ? `tel:${phone}` : undefined}
-          className="flex h-11 flex-col items-center justify-center gap-0.5 rounded-xl bg-sky-50 text-sky-700 active:bg-sky-100"
+          className="flex h-14 flex-col items-center justify-center gap-1 rounded-xl bg-sky-50 text-sky-700 active:bg-sky-100"
         >
-          <Phone className="size-4" />
-          <span className="text-[11px] font-medium">Llamar</span>
+          <Phone className="size-4.5" />
+          <span className="text-xs font-semibold">Llamar</span>
         </a>
         <button
           onClick={() => setNoteOpen(true)}
-          className="flex h-11 flex-col items-center justify-center gap-0.5 rounded-xl bg-neutral-100 text-neutral-600 active:bg-neutral-200"
+          className="flex h-14 flex-col items-center justify-center gap-1 rounded-xl bg-neutral-100 text-neutral-600 active:bg-neutral-200"
         >
-          <StickyNote className="size-4" />
-          <span className="text-[11px] font-medium">Nota</span>
+          <StickyNote className="size-4.5" />
+          <span className="text-xs font-semibold">Nota</span>
         </button>
         <button
           onClick={onOpenActions}
-          className="flex h-11 flex-col items-center justify-center gap-0.5 rounded-xl bg-violet-600 text-white active:bg-violet-700"
+          className="flex h-14 flex-col items-center justify-center gap-1 rounded-xl bg-violet-600 text-white active:bg-violet-700"
         >
-          <Plus className="size-4" />
-          <span className="text-[11px] font-medium">Más</span>
+          <Plus className="size-4.5" />
+          <span className="text-xs font-semibold">Más</span>
         </button>
       </div>
 

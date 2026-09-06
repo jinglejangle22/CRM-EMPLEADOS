@@ -22,8 +22,8 @@ export default function NewEmployeePage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-8 pt-4">
-      <h1 className="text-lg font-semibold text-neutral-900">Nuevo empleado</h1>
+    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-4 px-4 pb-8 pt-4">
+      <h1 className="text-2xl font-bold text-neutral-900">Nuevo empleado</h1>
 
       <form action={formAction} encType="multipart/form-data" className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">

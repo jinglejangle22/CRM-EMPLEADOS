@@ -68,7 +68,7 @@ export function CandidateProfileClient({
   }
 
   return (
-    <div className="flex flex-col gap-4 pb-6">
+    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-4 pb-6">
       <ProfileHeader
         firstName={candidate.firstName}
         lastName={candidate.lastName}

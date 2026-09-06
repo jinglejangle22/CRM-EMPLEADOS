@@ -27,8 +27,8 @@ export function EditInterviewForm({ interview }: { interview: InterviewInitialDa
   const [state, formAction, pending] = useActionState(updateInterviewAction, initialState);
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-8 pt-4">
-      <h1 className="text-lg font-semibold text-neutral-900">Editar entrevista</h1>
+    <div className="mx-auto flex w-full max-w-[640px] flex-col gap-4 px-4 pb-8 pt-4">
+      <h1 className="text-2xl font-bold text-neutral-900">Editar entrevista</h1>
 
       <form action={formAction} className="flex flex-col gap-4">
         <input type="hidden" name="interviewId" value={interview.id} />

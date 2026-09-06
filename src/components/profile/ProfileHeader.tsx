@@ -36,16 +36,16 @@ export function ProfileHeader({
   const age = formatAge(birthDate);
 
   return (
-    <div className="flex flex-col gap-3 bg-white px-4 pb-4 pt-3 ring-1 ring-neutral-100">
+    <div className="flex flex-col gap-3 border-b border-neutral-200 bg-white px-4 pb-4 pt-3">
       <button
         onClick={() => router.back()}
         aria-label="Volver"
-        className="flex size-8 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-100"
+        className="-ml-2 flex size-11 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-100"
       >
-        <ChevronLeft className="size-5" />
+        <ChevronLeft className="size-6" />
       </button>
 
-      <div className="flex items-center gap-3.5">
+      <div className="flex items-start gap-3.5">
         {photoFileId ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -59,31 +59,31 @@ export function ProfileHeader({
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="truncate text-lg font-semibold text-neutral-900">
-              {firstName} {lastName}
-            </p>
+          <p className="truncate text-lg font-bold text-neutral-900">
+            {firstName} {lastName}
+          </p>
+          <p className="mt-0.5 truncate text-sm text-neutral-600">
+            {position} {age ? `· ${age} años` : ""}
+          </p>
+          <div className="mt-1 flex items-center gap-1.5">
+            <span className="size-1.5 shrink-0 rounded-full" style={{ backgroundColor: company?.colorHex }} />
+            <span className="truncate text-sm text-neutral-500">{company?.shortName}</span>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <StatusBadge label={statusLabel} tone={statusTone} />
+            {rating != null && <RatingStars rating={rating} />}
             {onViewCv && (
               <button
                 type="button"
                 onClick={onViewCv}
-                className="flex shrink-0 items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700 active:bg-violet-100"
+                className="flex min-h-7 shrink-0 items-center gap-1 rounded-full bg-violet-50 px-3 text-[13px] font-semibold text-violet-700 active:bg-violet-100"
               >
                 <FileText className="size-3.5" />
-                CV
+                Ver CV
               </button>
             )}
           </div>
-          <p className="truncate text-sm text-neutral-500">
-            {position} {age ? `· ${age} años` : ""}
-          </p>
-          <div className="mt-1 flex items-center gap-1.5">
-            <span className="size-1.5 rounded-full" style={{ backgroundColor: company?.colorHex }} />
-            <span className="truncate text-xs text-neutral-500">{company?.shortName}</span>
-          </div>
-          {rating != null && <RatingStars rating={rating} className="mt-1.5" />}
         </div>
-        <StatusBadge label={statusLabel} tone={statusTone} />
       </div>
     </div>
   );
